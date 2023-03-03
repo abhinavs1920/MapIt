@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/logo" />
+
+    <TextView
+        android:id="@+id/textview"
+        android:layout_width="401dp"
+        android:layout_height="60dp"
+        android:layout_below="@id/imageView"
+        android:layout_marginTop="12dp"
+        android:padding="10dp"
+        android:text="Please Enter Your Note For Address :"
+        android:textAlignment="textStart"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/address"
+        android:layout_width="373dp"
+        android:layout_height="86dp"
+        android:layout_below="@id/textview"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="12dp"
+        android:isScrollContainer="true"
+        android:overScrollMode="ifContentScrolls"
+        android:scrollX="@android:dimen/app_icon_size"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:text="Your current Address"
+        android:textAlignment="center">
+
+
+    </TextView>
+
+    <EditText
+        android:id="@+id/title"
+        android:layout_width="201dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textview"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="109dp"
+        android:layout_marginTop="106dp"
+        android:layout_marginEnd="110dp"
+        android:hint="Title"
+        android:isScrollContainer="true"
+        android:minHeight="48dp"
+        android:overScrollMode="always"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textStyle="bold"
+        tools:ignore="SpeakableTextPresentCheck"/>
+
+    <EditText
+        android:id="@+id/message"
+        android:layout_width="397dp"
+        android:layout_height="101dp"
+        android:layout_below="@id/textview"
+        android:layout_marginTop="162dp"
+        android:hint="Write notes here"
+        android:isScrollContainer="true"
+        android:overScrollMode="always"
+        tools:ignore="SpeakableTextPresentCheck">
+
+    </EditText>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textview"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="270dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp">
+
+        <TextView
+            android:id="@+id/okay_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="100dp"
+            android:text="Save"
+            android:textColor="#3F51B5"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/cancel_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginLeft="100dp"
+            android:layout_toRightOf="@id/okay_text"
+            android:text="Cancel"
+            android:textColor="#FF0000"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

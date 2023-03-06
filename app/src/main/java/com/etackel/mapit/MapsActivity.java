@@ -7,11 +7,12 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -21,12 +22,13 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.etackel.mapit.databinding.ActivityMapsBinding;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,13 +36,17 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -55,19 +61,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public Criteria criteria;
     public String bestProvider;
     public TextView your_address;
+    String voice2text;
     public EditText message;
     public String message_string ;
     TextView okay_text, cancel_text;
     public ImageView profile;
     public LatLng latLng;
-    
+
+
+    private RecyclerView courseRV;
+    private ArrayList<Courses> coursesArrayList;
+    private CourseRVAdapter courseRVAdapter;
+    private FirebaseFirestore db;
+    ProgressBar loadingPB;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Query query = db.collection("db_notes");
 
         com.etackel.mapit.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -110,7 +121,66 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             dialog.setContentView(R.layout.dialog_saved);
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.setCancelable(true);
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            courseRV = dialog.findViewById(R.id.idRVCourses);
+            loadingPB = dialog.findViewById(R.id.idProgressBar);
+            // initializing our variable for firebase
+            // firestore and getting its instance.
+            db = FirebaseFirestore.getInstance();
+
+            // creating our new array list
+            coursesArrayList = new ArrayList<>();
+            courseRV.setHasFixedSize(true);
+            courseRV.setLayoutManager(new LinearLayoutManager(this));
+
+            // adding our array list to our recycler view adapter class.
+            courseRVAdapter = new CourseRVAdapter(coursesArrayList, this);
+
+            // setting adapter to our recycler view.
+            courseRV.setAdapter(courseRVAdapter);
+
+            // below line is use to get the data from Firebase Firestore.
+            // previously we were saving data on a reference of Courses
+            // now we will be getting the data from the same reference.
+            db.collection("db_notes").get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            // after getting the data we are calling on success method
+                            // and inside this method we are checking if the received
+                            // query snapshot is empty or not.
+                            if (!queryDocumentSnapshots.isEmpty()) {
+                                // if the snapshot is not empty we are
+                                // hiding our progress bar and adding
+                                // our data in a list.
+                                loadingPB.setVisibility(View.GONE);
+                                List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                                for (DocumentSnapshot d : list) {
+                                    // after getting this list we are passing
+                                    // that list to our object class.
+                                    Courses c = d.toObject(Courses.class);
+
+                                    // and we will pass this object class
+                                    // inside our arraylist which we have
+                                    // created for recycler view.
+                                    coursesArrayList.add(c);
+                                }
+                                // after adding the data to recycler view.
+                                // we are calling recycler view notifyDataSetChanged
+                                // method to notify that data has been changed in recycler view.
+                                courseRVAdapter.notifyDataSetChanged();
+                            } else {
+                                // if the snapshot is empty we are displaying a toast message.
+                                Toast.makeText(MapsActivity.this, "No data found in Database", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            // if we do not get any data or any error we are displaying
+                            // a toast message that we do not get any data
+                            Toast.makeText(MapsActivity.this, "Fail to get the data.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
             dialog.show();
         });
 
@@ -119,7 +189,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             dialog.setContentView(R.layout.dialog_info);
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.setCancelable(true);
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.show();
         });
 
@@ -129,7 +198,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             dialog.setContentView(R.layout.dialog);
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.setCancelable(false);
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             //dialog.getWindow().getAttributes().windowAnimations = R.style.animation;
             okay_text = dialog.findViewById(R.id.okay_text);
             cancel_text = dialog.findViewById(R.id.cancel_text);
@@ -203,7 +271,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     latitude = location.getLatitude();
                     longitude = location.getLongitude();
                     Toast.makeText(MapsActivity.this, "latitude:" + latitude + " longitude:" + longitude, Toast.LENGTH_SHORT).show();
-                    searchNearestPlace();
+                    searchNearestPlace(voice2text);
 
                     Geocoder geocoder;
                     List<Address> addresses;
@@ -211,7 +279,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
 
-                    m_Text = addresses.get(0).getAddressLine(0);
+                    String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                    String state = addresses.get(0).getAdminArea();
+                    String postalCode = addresses.get(0).getPostalCode();
+                    String knownName = addresses.get(0).getFeatureName();
+                    m_Text = address;
                     latLng = new LatLng(latitude,longitude);
 
 
@@ -246,7 +318,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public void searchNearestPlace() {
+    public void searchNearestPlace(String v2txt) {
         //.....
     }
 
@@ -270,11 +342,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // variables for storing our data.
         public String title, notes, latlng;
 
+        public Notes() {
+            // empty constructor
+            // required for Firebase.
+        }
+
         // Constructor for all variables.
         public Notes(String title, String notes, String latlng) {
             this.title = title;
             this.notes = notes;
             this.latlng = String.valueOf(latlng);
+        }
+
+        // getter methods for all variables.
+        public String gettitle() {
+            return title;
+        }
+
+        public void settitle(String title) {
+            this.title = title;
+        }
+
+        public String notes() {
+            return notes;
+        }
+
+        // setter method for all variables.
+        public void setnotes(String notes) {
+            this.notes = notes;
+        }
+
+        public String getLatlng() {
+            return latlng;
+        }
+
+        public void setLatlng(String latlng) {
+            this.latlng = latlng;
         }
 
     }
@@ -291,14 +394,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         MapsActivity.Notes courses = new Notes(title, notes, latlng);
 
         // below method is use to add data to Firebase Firestore.
-        db_notes.add(courses).addOnSuccessListener(documentReference -> {
-            // after the data addition is successful
-            // we are displaying a success toast message.
-            Toast.makeText(MapsActivity.this, "Your Notes Have Been Saved", Toast.LENGTH_SHORT).show();
-        }).addOnFailureListener(e -> {
-            // this method is called when the data addition process is failed.
-            // displaying a toast message when data addition is failed.
-            Toast.makeText(MapsActivity.this, "Fail to add course \n" + e, Toast.LENGTH_SHORT).show();
+        db_notes.add(courses).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference ) {
+                // after the data addition is successful
+                // we are displaying a success toast message.
+                Toast.makeText(MapsActivity.this, "Your Notes Have Been Saved", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                // this method is called when the data addition process is failed.
+                // displaying a toast message when data addition is failed.
+                Toast.makeText(MapsActivity.this, "Fail to add course \n" + e, Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

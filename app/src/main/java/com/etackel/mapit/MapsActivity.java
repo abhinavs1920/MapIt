@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -29,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.etackel.mapit.databinding.ActivityMapsBinding;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -118,6 +121,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         saved.setOnClickListener(v -> {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.setContentView(R.layout.dialog_saved);
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.setCancelable(true);
@@ -142,36 +146,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // previously we were saving data on a reference of Courses
             // now we will be getting the data from the same reference.
             db.collection("db_notes").get()
-                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                        @Override
-                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                            // after getting the data we are calling on success method
-                            // and inside this method we are checking if the received
-                            // query snapshot is empty or not.
-                            if (!queryDocumentSnapshots.isEmpty()) {
-                                // if the snapshot is not empty we are
-                                // hiding our progress bar and adding
-                                // our data in a list.
-                                loadingPB.setVisibility(View.GONE);
-                                List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
-                                for (DocumentSnapshot d : list) {
-                                    // after getting this list we are passing
-                                    // that list to our object class.
-                                    Courses c = d.toObject(Courses.class);
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        // after getting the data we are calling on success method
+                        // and inside this method we are checking if the received
+                        // query snapshot is empty or not.
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            // if the snapshot is not empty we are
+                            // hiding our progress bar and adding
+                            // our data in a list.
+                            loadingPB.setVisibility(View.GONE);
+                            List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                            for (DocumentSnapshot d : list) {
+                                // after getting this list we are passing
+                                // that list to our object class.
+                                Courses c = d.toObject(Courses.class);
 
-                                    // and we will pass this object class
-                                    // inside our arraylist which we have
-                                    // created for recycler view.
-                                    coursesArrayList.add(c);
-                                }
-                                // after adding the data to recycler view.
-                                // we are calling recycler view notifyDataSetChanged
-                                // method to notify that data has been changed in recycler view.
-                                courseRVAdapter.notifyDataSetChanged();
-                            } else {
-                                // if the snapshot is empty we are displaying a toast message.
-                                Toast.makeText(MapsActivity.this, "No data found in Database", Toast.LENGTH_SHORT).show();
+                                // and we will pass this object class
+                                // inside our arraylist which we have
+                                // created for recycler view.
+                                coursesArrayList.add(c);
                             }
+                            // after adding the data to recycler view.
+                            // we are calling recycler view notifyDataSetChanged
+                            // method to notify that data has been changed in recycler view.
+                            courseRVAdapter.notifyDataSetChanged();
+                        } else {
+                            // if the snapshot is empty we are displaying a toast message.
+                            Toast.makeText(MapsActivity.this, "No data found in Database", Toast.LENGTH_SHORT).show();
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -186,6 +187,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         info.setOnClickListener(v -> {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.setContentView(R.layout.dialog_info);
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.setCancelable(true);

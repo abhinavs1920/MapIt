@@ -3,7 +3,7 @@ package com.etackel.mapit;
 public class Courses {
 
     // variables for storing our data.
-    private String courseName, courseDescription, courseDuration;
+    private String title, notes, latlng;
 
     public Courses() {
         // empty constructor
@@ -11,36 +11,36 @@ public class Courses {
     }
 
     // Constructor for all variables.
-    public Courses(String courseName, String courseDescription, String courseDuration) {
-        this.courseName = courseName;
-        this.courseDescription = courseDescription;
-        this.courseDuration = courseDuration;
+    public Courses(String title, String notes, String latlng) {
+        this.title = title;
+        this.notes = notes;
+        this.latlng = latlng;
     }
 
     // getter methods for all variables.
-    public String getCourseName() {
-        return courseName;
+    public String getTitle() {
+        return title;
     }
 
-    public void setCourseName(String courseName) {
-        this.courseName = courseName;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getCourseDescription() {
-        return courseDescription;
+    public String getNotes() {
+        return notes;
     }
 
     // setter method for all variables.
-    public void setCourseDescription(String courseDescription) {
-        this.courseDescription = courseDescription;
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
-    public String getCourseDuration() {
-        return courseDuration;
+    public String getLatlng() {
+        return latlng;
     }
 
-    public void setCourseDuration(String courseDuration) {
-        this.courseDuration = courseDuration;
+    public void setLatlng(String latlng) {
+        this.latlng = latlng;
     }
 }
 

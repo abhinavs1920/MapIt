@@ -5,58 +5,90 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
-
-    private static int SPLASH_TIME_OUT = 2000;
-    View first,second,third,fourth,fifth,sixth;
-    TextView  slogan;
-    ImageView a;
-    Animation topAnimantion,bottomAnimation,middleAnimation;
-
-
+    SignInButton signInButton;
+    GoogleSignInClient mGoogleSignInClient;
+    static final int RC_SIGN_IN = 0;
+    private FirebaseFirestore db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-        first = findViewById(R.id.first_line);
-        second = findViewById(R.id.second_line);
-        third = findViewById(R.id.third_line);
-        fourth = findViewById(R.id.fourth_line);
-        fifth = findViewById(R.id.fifth_line);
-        sixth = findViewById(R.id.sixth_line);
-        a = findViewById(R.id.a);
-        slogan = findViewById(R.id.tagLine);
-        //Animation Calls
-        topAnimantion = AnimationUtils.loadAnimation(this, R.anim.top_animation);
-        bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.bottom_animation);
-        middleAnimation = AnimationUtils.loadAnimation(this, R.anim.middle_animation);
-        //-----------Setting Animations to the elements of Splash
-        first.setAnimation(topAnimantion);
-        second.setAnimation(topAnimantion);
-        third.setAnimation(topAnimantion);
-        fourth.setAnimation(topAnimantion);
-        fifth.setAnimation(topAnimantion);
-        sixth.setAnimation(topAnimantion);
-        a.setAnimation(middleAnimation);
-        slogan.setAnimation(bottomAnimation);
-        //Splash Screen Code to call new Activity after some time
-        new Handler().postDelayed(new Runnable() {
+        signInButton = (SignInButton) findViewById(R.id.signin);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
+            public void onClick(View view) {
+                switch (view.getId()) {
+                    case R.id.signin:
+                        signIn();
+                        break;
+                }}}); }
 
-                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        }, SPLASH_TIME_OUT);
+    private void signIn() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
+        }
     }
+
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            Toast.makeText(this, "Sign-in Successful", Toast.LENGTH_SHORT).show();
+            String personName = account.getDisplayName();
+            String personGivenName = account.getGivenName();
+            String personFamilyName = account.getFamilyName();
+            String personEmail = account.getEmail();
+            String personId = account.getId();
+            String personPhoto = "No Picture";
+            if(account.getPhotoUrl()!=null){
+                personPhoto = account.getPhotoUrl().toString();}
+            Intent intent = new Intent(this, MapsActivity.class);
+            startActivity(intent);
+        } catch (ApiException e) {
+            Log.w("Error", "signInResult:failed code=" + e.getStatusCode());
+        }
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        if(account!=null)
+        {
+            Toast.makeText(this, "User already Signed-in", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getApplicationContext(),MapsActivity.class);
+            startActivity(intent);
+        }
+    }
+
+  }
+
+

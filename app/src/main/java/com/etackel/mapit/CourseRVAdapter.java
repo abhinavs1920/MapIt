@@ -33,9 +33,9 @@ public class CourseRVAdapter extends RecyclerView.Adapter<CourseRVAdapter.ViewHo
     public void onBindViewHolder(@NonNull CourseRVAdapter.ViewHolder holder, int position) {
         // setting data to our text views from our modal class.
         Courses courses = coursesArrayList.get(position);
-        holder.courseNameTV.setText(courses.getCourseName());
-        holder.courseDurationTV.setText(courses.getCourseDuration());
-        holder.courseDescTV.setText(courses.getCourseDescription());
+        holder.courseNameTV.setText(courses.getTitle());
+        holder.courseDurationTV.setText(courses.getNotes());
+        holder.courseDescTV.setText(courses.getLatlng());
     }
 
     @Override

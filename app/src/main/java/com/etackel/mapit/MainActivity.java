@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            Toast.makeText(this, "Sign-in Successful", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Sign-in Successful", Toast.LENGTH_SHORT).show();
             String personName = account.getDisplayName();
             String personGivenName = account.getGivenName();
             String personFamilyName = account.getFamilyName();
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             String personPhoto = "No Picture";
             if(account.getPhotoUrl()!=null){
                 personPhoto = account.getPhotoUrl().toString();}
-            Intent intent = new Intent(this, MapsActivity.class);
+            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(intent);
         } catch (ApiException e) {
             Log.w("Error", "signInResult:failed code=" + e.getStatusCode());
@@ -83,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if(account!=null)
         {
-            Toast.makeText(this, "User already Signed-in", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getApplicationContext(),MapsActivity.class);
+            Toast.makeText(MainActivity.this, "User already Signed-in", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this,MapsActivity.class);
             startActivity(intent);
         }
     }

@@ -2,15 +2,14 @@ package com.etackel.mapit;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -21,6 +20,14 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import android.Manifest;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     SignInButton signInButton;
@@ -63,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             Toast.makeText(MainActivity.this, "Sign-in Successful", Toast.LENGTH_SHORT).show();
+
             String personName = account.getDisplayName();
             String personGivenName = account.getGivenName();
             String personFamilyName = account.getFamilyName();
@@ -85,10 +93,16 @@ public class MainActivity extends AppCompatActivity {
         {
             Toast.makeText(MainActivity.this, "User already Signed-in", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(MainActivity.this,MapsActivity.class);
+            intent.putExtra("user_email", account.getEmail());
             startActivity(intent);
         }
     }
 
-  }
+
+
+
+
+
+}
 
 

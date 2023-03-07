@@ -3,15 +3,14 @@ package com.etackel.mapit;
 
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -31,34 +30,39 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.etackel.mapit.databinding.ActivityMapsBinding;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener;
+import com.karumi.dexter.listener.single.PermissionListener;
+import com.karumi.dexter.listener.single.SnackbarOnDeniedPermissionListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     public FloatingActionButton new_message,saved,info;
     private String m_Text = "  ";
-    public double latitude;
+    public static double latitude;
     public double longitude;
     public LocationManager locationManager;
     public Criteria criteria;
@@ -70,6 +74,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     TextView okay_text, cancel_text;
     public ImageView profile;
     public LatLng latLng;
+    public String personEmail;
 
 
     private RecyclerView courseRV;
@@ -81,12 +86,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(MapsActivity.this);
+        Intent intent = getIntent();
+        personEmail = intent.getStringExtra("user_email");
 
 
         com.etackel.mapit.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
@@ -116,10 +123,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         new_message = findViewById(R.id.floatingActionButton);
         saved = findViewById(R.id.saved);
         info = findViewById(R.id.info);
+        FloatingActionButton profile_button = findViewById(R.id.floatingActionButton3);
+        profile_button.setOnClickListener(v -> {
+            Intent intent_ac = new Intent(MapsActivity.this, ProfileActivity.class);
+            startActivity(intent_ac);
+        });
 
         profile.setOnClickListener(v -> moveToCurrentLocation(latLng,mMap));
 
 
+        String finalPersonEmail = personEmail;
         saved.setOnClickListener(v -> {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.setContentView(R.layout.dialog_saved);
@@ -145,7 +158,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // below line is use to get the data from Firebase Firestore.
             // previously we were saving data on a reference of Courses
             // now we will be getting the data from the same reference.
-            db.collection("db_notes").get()
+            db.collection("db_notes").document(finalPersonEmail).collection("notes").get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         // after getting the data we are calling on success method
                         // and inside this method we are checking if the received
@@ -174,13 +187,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             // if the snapshot is empty we are displaying a toast message.
                             Toast.makeText(MapsActivity.this, "No data found in Database", Toast.LENGTH_SHORT).show();
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            // if we do not get any data or any error we are displaying
-                            // a toast message that we do not get any data
-                            Toast.makeText(MapsActivity.this, "Fail to get the data.", Toast.LENGTH_SHORT).show();
-                        }
+                    }).addOnFailureListener(e -> {
+                        // if we do not get any data or any error we are displaying
+                        // a toast message that we do not get any data
+                        Toast.makeText(MapsActivity.this, "Fail to get the data.", Toast.LENGTH_SHORT).show();
                     });
             dialog.show();
         });
@@ -191,6 +201,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             dialog.setContentView(R.layout.dialog_info);
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.setCancelable(true);
+
+            Toast.makeText(MapsActivity.this,"Your email"+personEmail,Toast.LENGTH_LONG).show();
             dialog.show();
         });
 
@@ -210,10 +222,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             okay_text.setOnClickListener(v1 -> {
                 message_string = String.valueOf(message.getText());
                 String message_title = String.valueOf(title.getText());
-                if(message_string.equals("")){
+                if(message_string.equals(""))
+                {
                     Toast.makeText(MapsActivity.this, "Please Enter Some Message", Toast.LENGTH_SHORT).show();
                 }
-                else {
+                else
+                {
                     dialog.dismiss();
                     addDataToFirestore(message_title,message_string, String.valueOf(latLng));
                 }
@@ -227,7 +241,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    /**
+    /*
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
      * This is where we can add markers or lines, add listeners or move the camera. In this case,
@@ -239,8 +253,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.addMarker(new MarkerOptions().position(latLng).title("Your current location"));
-        moveToCurrentLocation(latLng,mMap);
+       mMap.addMarker(new MarkerOptions().position(latLng).title("Your current location"));
+       moveToCurrentLocation(latLng,mMap);
     }
 
     public static boolean isLocationEnabled() {
@@ -262,7 +276,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //    ActivityCompat#requestPermissions
                     // here to request the missing permissions, and then overriding
                     //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
+                    //   int[] grantResults)
                     // to handle the case where the user grants the permission. See the documentation
                     // for ActivityCompat#requestPermissions for more details.
                     return;
@@ -334,15 +348,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
        // mMap.animateCamera(CameraUpdateFactory.zoomIn());
         // Zoom out to zoom level 10, animating with a duration of 2 seconds.
 
-
-
     }
 
 
     public static class Notes {
 
         // variables for storing our data.
-        public String title, notes, latlng;
+        public String title, notes;
+        public double lat,lng;
 
         public Notes() {
             // empty constructor
@@ -350,10 +363,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         // Constructor for all variables.
-        public Notes(String title, String notes, String latlng) {
+        public Notes(String title, String notes, double lat ,double  lng ) {
             this.title = title;
             this.notes = notes;
-            this.latlng = String.valueOf(latlng);
+            this.lat = lat;
+            this.lng = lng;
         }
 
         // getter methods for all variables.
@@ -374,13 +388,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             this.notes = notes;
         }
 
-        public String getLatlng() {
-            return latlng;
+        public double getLat() {
+            return lat;
         }
 
-        public void setLatlng(String latlng) {
-            this.latlng = latlng;
+        public void setLat(double lat) {
+            this.lat = lat;
         }
+
+        public double getLng() {
+            return lng;
+        }
+
+        public void setLng(double lng) {
+            this.lat = lng;
+        }
+
+
 
     }
 
@@ -389,27 +413,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // creating a collection reference
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        // for our Firebase Firetore database.
-        CollectionReference db_notes = db.collection("db_notes");
+        // for our Firebase Firestore database.
+
+        CollectionReference db_notes = db.collection("db_notes").document(personEmail).collection("notes");
+
 
         // adding our data to our courses object class.
-        MapsActivity.Notes courses = new Notes(title, notes, latlng);
+        MapsActivity.Notes courses = new Notes(title, notes, latitude , longitude);
+
 
         // below method is use to add data to Firebase Firestore.
-        db_notes.add(courses).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-            @Override
-            public void onSuccess(DocumentReference documentReference ) {
-                // after the data addition is successful
-                // we are displaying a success toast message.
-                Toast.makeText(MapsActivity.this, "Your Notes Have Been Saved", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                // this method is called when the data addition process is failed.
-                // displaying a toast message when data addition is failed.
-                Toast.makeText(MapsActivity.this, "Fail to add course \n" + e, Toast.LENGTH_SHORT).show();
-            }
+        db_notes.add(courses).addOnSuccessListener(documentReference -> {
+            // after the data addition is successful
+            // we are displaying a success toast message.
+            Toast.makeText(MapsActivity.this, "Your Notes Have Been Saved", Toast.LENGTH_SHORT).show();
+        }).addOnFailureListener(e -> {
+            // this method is called when the data addition process is failed.
+            // displaying a toast message when data addition is failed.
+            Toast.makeText(MapsActivity.this, "Fail to add course \n" + e, Toast.LENGTH_SHORT).show();
         });
     }
 

@@ -14,21 +14,7 @@
         android:layout_height="match_parent"
         tools:context=".MapsActivity"
         tools:layout="@layout/activity_maps" >
-
-
     </fragment>
-
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="@color/purple_500"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </androidx.appcompat.widget.Toolbar>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/profile"
@@ -43,6 +29,21 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.976"
         tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="414dp"
+        android:layout_height="82dp"
+        android:background="@color/purple_500"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
+    </androidx.appcompat.widget.Toolbar>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButton"
@@ -90,23 +91,12 @@
         android:clickable="true"
         app:layout_constraintBottom_toTopOf="@+id/profile"
         app:layout_constraintEnd_toStartOf="@+id/info"
-        app:layout_constraintHorizontal_bias="0.053"
+        app:layout_constraintHorizontal_bias="0.056"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintVertical_bias="0.961"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.965"
         app:srcCompat="@drawable/profileuser"
         tools:ignore="SpeakableTextPresentCheck" />
-
-    <ImageView
-        android:id="@+id/imageView4"
-        android:layout_width="412dp"
-        android:layout_height="92dp"
-        android:layout_marginBottom="652dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/logo" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textAlignment="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:context=".ProfileActivity">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="0dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:contextClickable="true"
+                    android:paddingTop="3sp"
+                    android:paddingBottom="3sp"
+                    android:textColor="#000000"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/email"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:contextClickable="true"
+                    android:paddingTop="3sp"
+                    android:paddingBottom="3sp"
+                    android:textColor="#00BCD4"
+                    android:textSize="20sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/signout"
+                    android:layout_width="380dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:text="Sign-out"
+                    android:textSize="20sp"
+                    app:backgroundTint="#FF5722" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/support"
+                    android:layout_width="378dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="50dp"
+                    android:text="Support"
+                    android:textSize="20sp"
+                    app:backgroundTint="#00BCD4" />
+
+                <TextView
+                    android:id="@+id/support_textview"
+                    android:layout_width="374dp"
+                    android:layout_height="61dp"
+                    android:text="We love our users that is why  we promise you giving best service from our side in everything"
+                    android:textAlignment="center"
+                    android:textSize="18sp" />
+
+                <ImageView
+                    android:id="@+id/imageView3"
+                    android:layout_width="292dp"
+                    android:layout_height="216dp"
+                    app:srcCompat="@drawable/logo" />
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="100dp">
+
+                </Space>
+
+            </LinearLayout>
+        </RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

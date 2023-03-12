@@ -91,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if(account!=null)
         {
-            Toast.makeText(MainActivity.this, "User already Signed-in", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(MainActivity.this,MapsActivity.class);
             intent.putExtra("user_email", account.getEmail());
             startActivity(intent);

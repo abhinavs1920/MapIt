@@ -62,7 +62,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     public FloatingActionButton new_message,saved,info;
     private String m_Text = "  ";
-    public static double latitude;
+    public double latitude;
     public double longitude;
     public LocationManager locationManager;
     public Criteria criteria;
@@ -253,8 +253,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
-       mMap.addMarker(new MarkerOptions().position(latLng).title("Your current location"));
-       moveToCurrentLocation(latLng,mMap);
+        mMap.addMarker(new MarkerOptions().position(latLng).title("Your current location"));
+        moveToCurrentLocation(latLng,mMap);
     }
 
     public static boolean isLocationEnabled() {
@@ -293,12 +293,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     List<Address> addresses;
                     geocoder = new Geocoder(this, Locale.getDefault());
 
-                    addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                    addresses = geocoder.getFromLocation(latitude, longitude, 1);
 
-                    String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                    String state = addresses.get(0).getAdminArea();
-                    String postalCode = addresses.get(0).getPostalCode();
-                    String knownName = addresses.get(0).getFeatureName();
+                    String address = addresses.get(0).getAddressLine(0);
                     m_Text = address;
                     latLng = new LatLng(latitude,longitude);
 
@@ -345,7 +342,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,15));
         // Zoom in, animating the camera.
-       // mMap.animateCamera(CameraUpdateFactory.zoomIn());
+        // mMap.animateCamera(CameraUpdateFactory.zoomIn());
         // Zoom out to zoom level 10, animating with a duration of 2 seconds.
 
     }

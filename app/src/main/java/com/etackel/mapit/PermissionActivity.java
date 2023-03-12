@@ -13,30 +13,33 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import com.google.android.material.snackbar.Snackbar;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
-import android.Manifest;
-
-import java.net.InetAddress;
 import java.util.List;
 
 public class PermissionActivity extends AppCompatActivity implements  ConnectionReceiver.ReceiverListener{
-
+    ProgressBar progressBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_permission);
+        progressBar = findViewById(R.id.progressBar);
         checkConnection();
-
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+               checkConnection();
+               progressBar.setVisibility(View.INVISIBLE);
+            }
+        }, 5000);   //5 seconds
 
 
     }
@@ -59,7 +62,7 @@ public class PermissionActivity extends AppCompatActivity implements  Connection
                         // this method is called when all permissions are granted
                         if (multiplePermissionsReport.areAllPermissionsGranted()) {
                             // do you work now
-                            Toast.makeText(PermissionActivity.this, "All the permissions are granted..", Toast.LENGTH_SHORT).show();
+                          //  Toast.makeText(PermissionActivity.this, "All the permissions are granted..", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(PermissionActivity.this, MainActivity.class);
                             startActivity(intent);
                         }
@@ -169,7 +172,7 @@ public class PermissionActivity extends AppCompatActivity implements  Connection
 
         // initialize snack bar
 
-       Toast.makeText(PermissionActivity.this,message,Toast.LENGTH_SHORT).show();
+      // Toast.makeText(PermissionActivity.this,message,Toast.LENGTH_SHORT).show();
     }
 
     @Override

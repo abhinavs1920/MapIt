@@ -10,6 +10,7 @@ App for saving location based notes in cloud
 ## Resources Used 
 * Android Studio
 * Google Firebase 
+* Jetpack
 
 ## How to Install
 
